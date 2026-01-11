@@ -14,7 +14,8 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
-const app = new Hono().basePath('/api');
+// No basePath - routes include /api
+const app = new Hono();
 
 // CORS
 app.use('*', cors({
@@ -25,10 +26,10 @@ app.use('*', cors({
 }));
 
 // Health check
-app.get('/health', (c) => c.json({ status: 'ok', service: 'portal-aluno-api' }));
+app.get('/api/health', (c) => c.json({ status: 'ok', service: 'portal-aluno-api' }));
 
 // Auth Login
-app.post('/v1/auth/login', async (c) => {
+app.post('/api/v1/auth/login', async (c) => {
     try {
         const { email, password } = await c.req.json();
 
@@ -91,7 +92,7 @@ app.post('/v1/auth/login', async (c) => {
 });
 
 // Auth Register
-app.post('/v1/auth/register', async (c) => {
+app.post('/api/v1/auth/register', async (c) => {
     try {
         const { matricula, email, password } = await c.req.json();
 
@@ -136,7 +137,7 @@ app.post('/v1/auth/register', async (c) => {
 });
 
 // Forgot Password
-app.post('/v1/auth/forgot-password', async (c) => {
+app.post('/api/v1/auth/forgot-password', async (c) => {
     try {
         const { email } = await c.req.json();
 
