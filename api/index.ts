@@ -25,6 +25,14 @@ app.use('*', cors({
     credentials: true,
 }));
 
+// Root info
+app.get('/', (c) => c.json({
+    name: 'Portal Aluno API',
+    version: '1.0.0',
+    health: '/api/health',
+    docs: 'Use /api/v1/* endpoints'
+}));
+
 // Health check
 app.get('/api/health', (c) => c.json({ status: 'ok', service: 'portal-aluno-api' }));
 
