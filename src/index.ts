@@ -2,13 +2,13 @@
  * Portal Aluno API - Entry Point
  * 
  * Hono-based REST API for student portal.
- * Built for deployment on Render.
+ * Works on both Node.js (local) and Vercel (serverless).
  */
 
-import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
+import { handle } from 'hono/vercel';
 
 // Middleware
 import { authMiddleware } from './middleware/auth.js';
@@ -25,16 +25,24 @@ import { atestados } from './routes/atestados.js';
 import { justificativas } from './routes/justificativas.js';
 import { escola } from './routes/escola.js';
 
-// Create app
-const app = new Hono();
+// Create app with base path
+const app = new Hono().basePath('/api');
 
 // =====================
 // Global Middleware
 // =====================
 
-// CORS
+// CORS - Dynamic origin
 app.use('*', cors({
-    origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173'],
+    origin: (origin) => {
+        // Allow localhost for development
+        if (origin?.includes('localhost')) return origin;
+        // Allow Vercel preview deployments
+        if (origin?.includes('vercel.app')) return origin;
+        // Allow custom domain
+        if (origin?.includes('chamadadiaria.com.br')) return origin;
+        return null;
+    },
     allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -51,7 +59,7 @@ app.onError(errorHandler);
 // =====================
 
 // Health check
-app.get('/', (c) => {
+app.get('/health', (c) => {
     return c.json({
         name: 'Portal Aluno API',
         version: '1.0.0',
@@ -60,17 +68,8 @@ app.get('/', (c) => {
     });
 });
 
-// API info
-app.get('/health', (c) => {
-    return c.json({
-        status: 'healthy',
-        uptime: process.uptime(),
-        memory: process.memoryUsage(),
-    });
-});
-
 // Public auth routes (no auth required)
-app.route('/api/v1/auth', auth);
+app.route('/v1/auth', auth);
 
 // =====================
 // Protected Routes
@@ -93,7 +92,7 @@ v1.route('/justificativas', justificativas);
 v1.route('/escola', escola);
 
 // Mount v1 to main app
-app.route('/api/v1', v1);
+app.route('/v1', v1);
 
 // =====================
 // 404 Handler
@@ -108,33 +107,26 @@ app.notFound((c) => {
 });
 
 // =====================
-// Server
+// Export for Vercel
 // =====================
 
-const port = Number(process.env.PORT) || 3000;
+export const GET = handle(app);
+export const POST = handle(app);
+export const PATCH = handle(app);
+export const DELETE = handle(app);
+export const OPTIONS = handle(app);
 
-console.log(`
-╔════════════════════════════════════════════════╗
-║         🎓 Portal Aluno API                    ║
-║                                                ║
-║  Server running on http://localhost:${port}      ║
-║                                                ║
-║  Endpoints:                                    ║
-║    GET  /              - API info              ║
-║    GET  /health        - Health check          ║
-║    GET  /api/v1/me     - Student data          ║
-║    GET  /api/v1/presencas - Attendance         ║
-║    GET  /api/v1/boletim   - Grades             ║
-║    GET  /api/v1/beneficios - Benefits          ║
-║    GET  /api/v1/atestados  - Certificates      ║
-║    POST /api/v1/justificativas - Justify       ║
-║    GET  /api/v1/escola        - School info    ║
-╚════════════════════════════════════════════════╝
-`);
+// =====================
+// Local Development Server
+// =====================
 
-serve({
-    fetch: app.fetch,
-    port,
-});
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+    import('@hono/node-server').then(({ serve }) => {
+        const port = Number(process.env.PORT) || 3000;
+        console.log(`🎓 Portal Aluno API running on http://localhost:${port}`);
+        serve({ fetch: app.fetch, port });
+    });
+}
 
 export default app;
+
