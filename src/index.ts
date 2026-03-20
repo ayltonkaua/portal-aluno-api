@@ -7,6 +7,7 @@
 
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import 'dotenv/config';
 import { logger } from 'hono/logger';
 import { handle } from 'hono/vercel';
 
@@ -24,6 +25,9 @@ import { beneficios } from './routes/beneficios.js';
 import { atestados } from './routes/atestados.js';
 import { justificativas } from './routes/justificativas.js';
 import { escola } from './routes/escola.js';
+import { avisos } from './routes/avisos.js';
+import { estagios } from './routes/estagios.js';
+import { suporte } from './routes/suporte.js';
 
 // Create app with base path
 const app = new Hono().basePath('/api');
@@ -94,6 +98,9 @@ v1.route('/beneficios', beneficios);
 v1.route('/atestados', atestados);
 v1.route('/justificativas', justificativas);
 v1.route('/escola', escola);
+v1.route('/avisos', avisos);
+v1.route('/estagios', estagios);
+v1.route('/suporte', suporte);
 
 // Mount v1 to main app
 app.route('/v1', v1);

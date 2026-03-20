@@ -35,7 +35,7 @@ auth.post('/login', async (c) => {
     });
 
     if (authError || !authData.user) {
-        return c.json({ success: false, error: 'Credenciais inválidas' }, 401);
+        return c.json({ success: false, error: 'E-mail ou senha incorretos' }, 401);
     }
 
     // 2. Check if user has 'aluno' role

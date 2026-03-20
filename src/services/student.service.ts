@@ -23,6 +23,16 @@ export const studentService = {
                 nome_responsavel,
                 telefone_responsavel,
                 endereco,
+                data_nascimento,
+                trabalha,
+                mora_com_familia,
+                recebe_bolsa_familia,
+                recebe_pe_de_meia,
+                usa_transporte,
+                tem_passe_livre,
+                telefone_aluno,
+                telefone_responsavel_2,
+                dados_atualizados_em,
                 turmas (nome)
             `)
             .eq('id', alunoId)
@@ -40,6 +50,16 @@ export const studentService = {
             nome_responsavel: data.nome_responsavel || undefined,
             telefone_responsavel: data.telefone_responsavel || undefined,
             endereco: data.endereco || undefined,
+            data_nascimento: data.data_nascimento || undefined,
+            trabalha: data.trabalha,
+            mora_com_familia: data.mora_com_familia,
+            recebe_bolsa_familia: data.recebe_bolsa_familia,
+            recebe_pe_de_meia: data.recebe_pe_de_meia,
+            usa_transporte: data.usa_transporte,
+            tem_passe_livre: data.tem_passe_livre,
+            telefone_aluno: data.telefone_aluno || undefined,
+            telefone_responsavel_2: data.telefone_responsavel_2 || undefined,
+            dados_atualizados_em: data.dados_atualizados_em || undefined,
         };
     },
 
@@ -105,6 +125,16 @@ export const studentService = {
             nome_responsavel?: string;
             telefone_responsavel?: string;
             endereco?: string;
+            data_nascimento?: string;
+            trabalha?: boolean;
+            mora_com_familia?: boolean;
+            recebe_bolsa_familia?: boolean;
+            recebe_pe_de_meia?: boolean;
+            usa_transporte?: boolean;
+            tem_passe_livre?: boolean;
+            telefone_aluno?: string;
+            telefone_responsavel_2?: string;
+            distancia_km?: number;
         }
     ): Promise<void> {
         const { error } = await supabase

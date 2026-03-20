@@ -44,12 +44,25 @@ me.patch('/dados', async (c) => {
     const body = await c.req.json();
 
     // Validate input
-    const allowedFields = ['nome_responsavel', 'telefone_responsavel', 'endereco'];
-    const updateData: Record<string, string> = {};
+    const allowedFields = [
+        'nome_responsavel', 
+        'telefone_responsavel', 
+        'endereco',
+        'data_nascimento',
+        'trabalha',
+        'mora_com_familia',
+        'recebe_bolsa_familia',
+        'recebe_pe_de_meia',
+        'usa_transporte',
+        'tem_passe_livre',
+        'telefone_aluno',
+        'telefone_responsavel_2'
+    ];
+    const updateData: Record<string, any> = {};
 
     for (const field of allowedFields) {
         if (body[field] !== undefined) {
-            updateData[field] = String(body[field]).trim();
+            updateData[field] = body[field];
         }
     }
 

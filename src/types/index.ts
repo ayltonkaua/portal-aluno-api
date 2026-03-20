@@ -16,6 +16,16 @@ export interface StudentData {
     nome_responsavel?: string;
     telefone_responsavel?: string;
     endereco?: string;
+    data_nascimento?: string;
+    trabalha?: boolean;
+    mora_com_familia?: boolean;
+    recebe_bolsa_familia?: boolean;
+    recebe_pe_de_meia?: boolean;
+    usa_transporte?: boolean;
+    tem_passe_livre?: boolean;
+    telefone_aluno?: string;
+    telefone_responsavel_2?: string;
+    dados_atualizados_em?: string;
 }
 
 export interface FrequenciaStats {
@@ -45,6 +55,15 @@ export interface Atestado {
     data_fim: string;
     descricao: string;
     status: 'pendente' | 'aprovado' | 'rejeitado';
+    created_at: string;
+}
+
+export interface SolicitacaoSuporte {
+    id: string;
+    assunto: string;
+    mensagem: string;
+    telefone_contato?: string;
+    status: string;
     created_at: string;
 }
 
