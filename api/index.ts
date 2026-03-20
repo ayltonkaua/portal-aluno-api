@@ -226,7 +226,7 @@ app.get('/api/v1/me', async (c) => {
 
         const { data: aluno } = await supabase
             .from('alunos')
-            .select('id, nome, matricula, turma_id, escola_id, nome_responsavel, telefone_responsavel, endereco')
+            .select('*')
             .eq('id', auth.alunoId)
             .single();
 
@@ -248,6 +248,16 @@ app.get('/api/v1/me', async (c) => {
                 nome_responsavel: aluno?.nome_responsavel,
                 telefone_responsavel: aluno?.telefone_responsavel,
                 endereco: aluno?.endereco,
+                data_nascimento: aluno?.data_nascimento,
+                trabalha: aluno?.trabalha,
+                mora_com_familia: aluno?.mora_com_familia,
+                recebe_bolsa_familia: aluno?.recebe_bolsa_familia,
+                recebe_pe_de_meia: aluno?.recebe_pe_de_meia,
+                usa_transporte: aluno?.usa_transporte,
+                tem_passe_livre: aluno?.tem_passe_livre,
+                telefone_aluno: aluno?.telefone_aluno,
+                telefone_responsavel_2: aluno?.telefone_responsavel_2,
+                dados_atualizados_em: aluno?.dados_atualizados_em,
             },
         });
     } catch (error: any) {
@@ -310,14 +320,40 @@ app.patch('/api/v1/me/dados', async (c) => {
         const auth = await validateAlunoToken(c.req.header('Authorization'));
         if (!auth.valid) return c.json({ success: false, error: 'Não autorizado' }, 401);
 
-        const { nome_responsavel, telefone_responsavel, endereco } = await c.req.json();
+        const body = await c.req.json();
+
+        // Validate input
+        const allowedFields = [
+            'nome_responsavel', 
+            'telefone_responsavel', 
+            'endereco',
+            'data_nascimento',
+            'trabalha',
+            'mora_com_familia',
+            'recebe_bolsa_familia',
+            'recebe_pe_de_meia',
+            'usa_transporte',
+            'tem_passe_livre',
+            'telefone_aluno',
+            'telefone_responsavel_2'
+        ];
+        
+        const updateData: Record<string, any> = {};
+
+        for (const field of allowedFields) {
+            if (body[field] !== undefined) {
+                updateData[field] = body[field];
+            }
+        }
+
+        if (Object.keys(updateData).length === 0) {
+            return c.json({ success: false, error: 'Nenhum dado para atualizar' }, 400);
+        }
 
         const { error } = await supabase
             .from('alunos')
             .update({
-                nome_responsavel,
-                telefone_responsavel,
-                endereco,
+                ...updateData,
                 dados_atualizados_em: new Date().toISOString()
             })
             .eq('id', auth.alunoId);
