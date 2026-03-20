@@ -521,6 +521,52 @@ app.get('/api/v1/escola', async (c) => {
     }
 });
 
+// =====================
+// /avisos
+// =====================
+
+app.get('/api/v1/avisos', async (c) => {
+    try {
+        const auth = await validateAlunoToken(c.req.header('Authorization'));
+        if (!auth.valid) return c.json({ success: false, error: 'Não autorizado' }, 401);
+
+        const { data, error } = await supabase
+            .from('portal_comunicados')
+            .select('id, titulo, conteudo, tipo, data_publicacao, ativo')
+            .eq('escola_id', auth.escolaId)
+            .eq('ativo', true)
+            .order('data_publicacao', { ascending: false });
+
+        if (error) throw error;
+        return c.json({ success: true, data: data || [] });
+    } catch (error: any) {
+        return c.json({ success: false, error: error.message }, 500);
+    }
+});
+
+// =====================
+// /estagios
+// =====================
+
+app.get('/api/v1/estagios', async (c) => {
+    try {
+        const auth = await validateAlunoToken(c.req.header('Authorization'));
+        if (!auth.valid) return c.json({ success: false, error: 'Não autorizado' }, 401);
+
+        const { data, error } = await supabase
+            .from('portal_estagios')
+            .select('id, empresa, cargo, descricao, bolsa, requisitos, link_inscricao, data_publicacao, ativo')
+            .eq('escola_id', auth.escolaId)
+            .eq('ativo', true)
+            .order('data_publicacao', { ascending: false });
+
+        if (error) throw error;
+        return c.json({ success: true, data: data || [] });
+    } catch (error: any) {
+        return c.json({ success: false, error: error.message }, 500);
+    }
+});
+
 // Export handlers
 export const GET = handle(app);
 export const POST = handle(app);
