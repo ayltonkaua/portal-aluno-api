@@ -7,6 +7,30 @@ import { supabase } from '../lib/supabase.js';
 
 export const auth = new Hono();
 
+const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
+const WINDOW_MS = 15 * 60 * 1000;
+const MAX_ATTEMPTS = 5;
+
+const rateLimiter = async (c: any, next: () => Promise<void>) => {
+    const ip = c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || 'unknown';
+    const now = Date.now();
+    const record = rateLimitMap.get(ip);
+    
+    if (record) {
+        if (now - record.lastReset > WINDOW_MS) {
+            rateLimitMap.set(ip, { count: 1, lastReset: now });
+        } else {
+            record.count += 1;
+            if (record.count > MAX_ATTEMPTS) {
+                return c.json({ success: false, error: 'Muitas tentativas de login. Tente novamente em 15 minutos.' }, 429);
+            }
+        }
+    } else {
+        rateLimitMap.set(ip, { count: 1, lastReset: now });
+    }
+    await next();
+};
+
 interface LoginBody {
     email: string;
     password: string;
@@ -21,7 +45,7 @@ interface RegisterBody {
 /**
  * POST /auth/login - Login with email and password
  */
-auth.post('/login', async (c) => {
+auth.post('/login', rateLimiter, async (c) => {
     const body = await c.req.json<LoginBody>();
 
     if (!body.email || !body.password) {
